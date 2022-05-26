@@ -1,10 +1,22 @@
-import { Canvas, useFrame } from "@react-three/fiber";
-import { useRef } from "react";
+import * as THREE from "three";
+import { Canvas, useFrame,useThree } from "@react-three/fiber";
+import { useRef, useState} from "react";
 
-function Box() {
+function Box({z}) {
   const ref = useRef();
+
+  const {viewport,camera} = useThree() 
+  const {width,height} = viewport.getCurrentViewport(camera,[0,0,-1])
+  const [data] = useState({
+    x:THREE.MathUtils.randFloatSpread(2),
+    y:THREE.MathUtils.randFloatSpread(height)
+  })
+
   useFrame((state) => {
-    ref.current.position.y = Math.sin(state.clock.elapsedTime);
+    ref.current.position.set(data.x * width,(data.y += 0.5),z);
+    if(data.y > height/1.5){
+      data.y = -height/1.5
+    }
   });
 
   return (
@@ -15,10 +27,10 @@ function Box() {
   );
 }
 
-export default function App() {
+export default function App({count = 100}) {
   return (
     <Canvas>
-      <Box />
+      {Array.from({length:count},(_,i) => (<Box key={i} z={-i} />))}
     </Canvas>
   );
 }
